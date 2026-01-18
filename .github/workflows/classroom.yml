@@ -1,0 +1,31 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: level-0-validate
+      id: level-0-validate
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: level-0-validate
+        setup-command: ''
+        command: '#!/bin/bash set -e  COUNT=$(git rev-list --count HEAD) if [ "$COUNT"
+          -lt 4 ]; then   exit 1 fi'
+        timeout: 1
+        max-score: 10
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        LEVEL-0-VALIDATE_RESULTS: "${{steps.level-0-validate.outputs.result}}"
+      with:
+        runners: level-0-validate
